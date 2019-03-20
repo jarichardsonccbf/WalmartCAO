@@ -86,5 +86,13 @@ CAOwk7.instock.upc <- highlow(CAOwk7.instocks, 'UPC.Number')
 CAOwk7.ccbf.instock.upc <- highlow(CAOwk7.ccbf.instocks, 'UPC.Number')
 
 CAOwk7 %>% 
-  ggplot(aes(x = OWNER, y = Case.Difference), fill = City) +
-  geom_boxplot()
+  ggplot(aes(x = OWNER, y = Case.Difference)) +
+  geom_boxplot() +
+  theme(legend.position="none")
+
+CAOwk7 %>% 
+  filter(OWNER == "CCBF") %>%
+  ggplot(aes(x = City, y = Case.Difference, color = City)) +
+  geom_boxplot() +
+  theme(legend.position="none")
+  
