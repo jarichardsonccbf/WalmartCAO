@@ -1,5 +1,6 @@
 #package loading
 library(tidyverse)
+library(plotly)
 
 #data preprocessing----
 CAO.units.cases <- read.csv("CAOWeek7units.csv", stringsAsFactors = FALSE)
@@ -85,6 +86,7 @@ highlow <- function(df, cate, N = 10, n = 10) { #cate is category (column to gro
   return(rbind(topN, bottomn))
 }
 
+#highest and lowest brand differences
 CAOwk7.brand <- highlow(CAOwk7, 'Brand', 10, 10) %>% 
   mutate(label = "All")
 CAOwk7.CCBF.brand <- highlow(CAOwk7.CCBF, 'Brand') %>% 
@@ -106,26 +108,89 @@ CAOwk7.CCBF.upc <- highlow(CAOwk7.CCBF, 'UPC.Number')
 CAOwk7.instock.upc <- highlow(CAOwk7.instocks, 'UPC.Number')
 CAOwk7.ccbf.instock.upc <- highlow(CAOwk7.ccbf.instocks, 'UPC.Number')
 
-<<<<<<< HEAD
+
 CAOplot <- function(df, xax, yax){
 df %>% 
   ggplot(aes(x = xax, y = yax, color = xax)) +
-  geom_boxplot() +
+  geom_boxplot(outlier.size = 2) +
   theme(legend.position="none")
 }
 
 CAOplot(CAOwk7, CAOwk7$OWNER, CAOwk7$Case.Difference)
-CAOplot(CAOwk7.CCBF, as.factor(CAOwk7.CCBF$Store), CAOwk7.CCBF$Case.Difference)
+
+CAOplot(CAOwk7.CCBF, as.factor(CAOwk7.CCBF$Store), CAOwk7.CCBF$Case.Difference) + xlab("Store number") + ylab("Case Differences")
+
+#what is the big one in 767?
+CAOwk7.CCBF %>% 
+  filter(Store == "767") %>% 
+  filter(Case.Difference == max(Case.Difference)) %>% 
+  select(Beverage.Product.Description, Pack)
+
+#small one in 538?
+CAOwk7.CCBF %>% 
+  filter(Store == "538") %>% 
+  filter(Case.Difference == min(Case.Difference)) %>% 
+  select(Beverage.Product.Description, Pack)
+
+#big in 1081?
+CAOwk7.CCBF %>% 
+  filter(Store == "1081") %>% 
+  filter(Case.Difference == max(Case.Difference)) %>% 
+  select(Beverage.Product.Description, Pack)
+
 CAOplot(CAOwk7.instocks, CAOwk7.instocks$OWNER, CAOwk7.instocks$Case.Difference)
+
 CAOplot(CAOwk7.ccbf.instocks, as.factor(CAOwk7.ccbf.instocks$Store), CAOwk7.ccbf.instocks$Case.Difference) 
 
-CAOwk7 %>% 
-  ggplot(aes(x = OWNER, y = Case.Difference)) +
-  geom_boxplot() +
-  theme(legend.position="none")
+#Do results vary by city?
+CAOwk7.CCBF %>% 
+  ggplot(aes(x = City, y = Case.Difference, color = City)) +
+  geom_boxplot(outlier.size = 2) +
+  theme(legend.position="none") +
+  ylab("Case Difference")
 
-CAOwk7 %>% 
-  filter(OWNER == "CCBF") %>%
+CAOwk7.ccbf.instocks %>% 
   ggplot(aes(x = City, y = Case.Difference, color = City)) +
   geom_boxplot() +
   theme(legend.position="none")
+
+#Cases per product
+avg.cases <- CAOwk7.ccbf.instocks %>% 
+  group_by(Item.Nbr) %>% 
+  summarise(meanAM = mean(Weekly.AM.Order.Units), 
+            sd = sd(Weekly.AM.Order.Units),
+            meanCD = mean(abs(Case.Difference)),
+            meanCAO = mean(Weekly.GRS.Order.Units),
+            sdCAO = sd(Weekly.GRS.Order.Units)) %>% 
+  arrange(desc(meanAM)) %>% 
+  mutate(rank = c(152:1))
+
+itmnmbr.avg.case.join <- itmnmbr %>% 
+  select(Item.Nbr, Retail.Package.Group, Beverage.Product.Description)
+
+avg.cases$sd[avg.cases$sd=="NaN"] <- 0
+
+avg.cases <- avg.cases %>% 
+  left_join(itmnmbr.avg.case.join, key = "Item.Nbr") %>% 
+  unite(product, Beverage.Product.Description, Retail.Package.Group)
+
+avg.cases
+
+ avg.cases.plot <- avg.cases %>% 
+  ggplot(aes(y = meanAM, x = rank, color = meanCD, text = paste("Product:", product))) + 
+  geom_point() +
+  geom_errorbar(aes(ymin=meanAM-sd, ymax=meanAM+sd), width=.1) +
+  coord_flip() +
+  scale_y_continuous(breaks=seq(0, 400, 10)) +
+  scale_color_gradient2() +
+  theme(panel.background = element_rect(color = NA, fill = "dark gray"))  
+
+ggplotly(avg.cases.plot)
+
+avg.cases.plot2 <- avg.cases %>%
+  ggplot() +
+  geom_point(aes(y = meanAM, x = rank, color = meanCD, text = paste("Product:", product))) +
+  geom_point(aes(y = meanCAO, x = rank, text = paste("Product:", product)))+
+  coord_flip()
+
+ggplotly(avg.cases.plot2)
