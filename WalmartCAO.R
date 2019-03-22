@@ -208,4 +208,17 @@ CAO(wk7.instocks)
 CAO(wk7.ccbf.instocks)
 
 #Function to calculate interesting metrics for each product----
+product_metrics <- wk7.ccbf.instocks %>% 
+  unite(PRODUCT, Beverage.Product.Description, Beverage.Category) %>% 
+  group_by(PRODUCT) %>% 
+  summarise(
+    ME = mean(Case.Difference),
+    RMSE = sqrt(mean((Weekly.AM.Order.Units - Weekly.GRS.Order.Units)^2)),
+    RAE = rae(Weekly.AM.Order.Units, Weekly.GRS.Order.Units),
+    RSE = rse(Weekly.AM.Order.Units, Weekly.GRS.Order.Units),
+    MAE = mean(abs(Case.Difference))
+  ) %>% 
+  arrange(desc(RMSE))
 
+#Why inf for some?
+wk7.ccbf.instocks %>%  filter(Beverage.Product.Description == "Powerade Lemon Lime") %>% select(Weekly.AM.Order.Units, Weekly.GRS.Order.Units)
