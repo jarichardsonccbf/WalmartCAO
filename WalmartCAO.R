@@ -1,6 +1,7 @@
 #package loading
 library(tidyverse)
 library(plotly)
+library(Metrics)
 
 #data preprocessing----
 wk7.units.cases <- read.csv("CAOWeek7units.csv", stringsAsFactors = FALSE)
@@ -21,7 +22,7 @@ wk7.units.cases <- wk7.units.cases %>%
 #df subsets
 
 #just CCBF
-wk7.CCBF <- wk7 %>% 
+wk7.ccbf <- wk7 %>% 
   filter(OWNER == "CCBF")
 
 #just in stocks
@@ -34,81 +35,11 @@ wk7.ccbf.instocks <- wk7 %>%
   filter(Weekly.Unit.Sales != 0 & Weekly.Units.On.Hand != 0 & Weekly.AM.Order.Units > 0)
 
 wk7
-wk7.CCBF
+wk7.ccbf
 wk7.instocks
 wk7.ccbf.instocks
 
-#Function to calculate interesting metrics for each----
-CAO <- function(df) {
-  ppm = df %>% 
-    filter(Case.Difference == 0) %>% 
-    count(n()) %>% 
-    select(n) / nrow(df) * 100
-  
-  d5 = df %>% 
-    filter(Case.Difference <= 5 & Case.Difference >= -5) %>% 
-    count(n()) %>% 
-    select(n) / nrow(df) * 100
-  
-  d10 = df %>% 
-    filter(Case.Difference <= 10 & Case.Difference >= -10) %>% 
-    count(n()) %>% 
-    select(n) / nrow(df) * 100
-  
-  rms = sqrt(mean((df$Weekly.AM.Order.Units - df$Weekly.GRS.Order.Units)^2))
-  
-  mae = mean(abs(df$Case.Difference))
-  
-  list(Percentage.Perfect = ppm, diff5 = d5, diff10 = d10, RMSE = rms, MAE = mae)
-}
-
-CAO(wk7)
-CAO(wk7.CCBF)
-CAO(wk7.instocks)
-CAO(wk7.ccbf.instocks)
-
-#product highlights----
-highlow <- function(df, cate, N = 10, n = 10) { #cate is category (column to group by) N is top N values, n is bottom n values
-  topN <- df %>% 
-    group_by_(cate) %>% 
-    summarise(avg = mean(Case.Difference)) %>% 
-    arrange(desc(avg)) %>% 
-    top_n(N)%>% 
-    mutate(rank = "top")
-    
-  bottomn <- df %>% 
-    group_by_(cate) %>% 
-    summarise(avg = mean(Case.Difference)) %>% 
-    arrange(desc(avg)) %>% 
-    top_n(-n) %>% 
-    mutate(rank = "bottom")
-  
-  return(rbind(topN, bottomn))
-}
-
-#highest and lowest brand differences
-wk7.brand <- highlow(wk7, 'Brand', 10, 10) %>% 
-  mutate(label = "All")
-wk7.CCBF.brand <- highlow(wk7.CCBF, 'Brand') %>% 
-  mutate(label = "CCBF")
-wk7.instocks.brand <- highlow(wk7.instocks, 'Brand') %>% 
-  mutate(label = "All.instock")
-wk7.ccbf.instocks.brand <- highlow(wk7.ccbf.instocks, 'Brand') %>% 
-  mutate(label = "CCBF.instock")
-#write.csv(rbind(wk7.brand, wk7.CCBF.brand, wk7.instocks.brand, wk7.ccbf.instocks.brand), "topbrands.csv", sep = ",")
-
-
-wk7.pack <- highlow(wk7, 'Pack')
-wk7.CCBF.pack <- highlow(wk7.CCBF, 'Pack')
-wk7.instock.pack <- highlow(wk7.instocks, 'Pack')
-wk7.ccbf.instock.pack <- highlow(wk7.ccbf.instocks, 'Pack')
-
-wk7.upc <- highlow(wk7, 'UPC.Number')
-wk7.CCBF.upc <- highlow(wk7.CCBF, 'UPC.Number')
-wk7.instock.upc <- highlow(wk7.instocks, 'UPC.Number')
-wk7.ccbf.instock.upc <- highlow(wk7.ccbf.instocks, 'UPC.Number')
-
-
+#any differences between factors of various treatments
 CAOplot <- function(df, xax, yax){
 df %>% 
   ggplot(aes(x = xax, y = yax, color = xax)) +
@@ -116,31 +47,28 @@ df %>%
   theme(legend.position="none")
 }
 
-CAOplot(wk7, wk7$OWNER, wk7$Case.Difference)
+CAOplot(wk7.instocks, wk7.instocks$OWNER, wk7.instocks$Case.Difference)
 
-CAOplot(wk7.CCBF, as.factor(wk7.CCBF$Store), wk7.CCBF$Case.Difference) + xlab("Store number") + ylab("Case Differences")
+CAOplot(wk7.ccbf.instocks, as.factor(wk7.ccbf.instocks$Store), wk7.ccbf.instocks$Case.Difference) + xlab("Store number") + ylab("Case Differences")
 
 #what is the big one in 767?
 wk7.CCBF %>% 
   filter(Store == "767") %>% 
   filter(Case.Difference == max(Case.Difference)) %>% 
   select(Beverage.Product.Description, Pack)
+#This is a consistently high order based on MM data
 
 #small one in 538?
 wk7.CCBF %>% 
   filter(Store == "538") %>% 
   filter(Case.Difference == min(Case.Difference)) %>% 
-  select(Beverage.Product.Description, Pack)
+  select(Beverage.Category, Pack)
 
 #big in 1081?
 wk7.CCBF %>% 
   filter(Store == "1081") %>% 
   filter(Case.Difference == max(Case.Difference)) %>% 
   select(Beverage.Product.Description, Pack)
-
-CAOplot(wk7.instocks, wk7.instocks$OWNER, wk7.instocks$Case.Difference)
-
-CAOplot(wk7.ccbf.instocks, as.factor(wk7.ccbf.instocks$Store), wk7.ccbf.instocks$Case.Difference) 
 
 #Do results vary by city?
 wk7.CCBF %>% 
@@ -201,7 +129,7 @@ avg.cases.plot2 <- avg.cases %>%
 
 ggplotly(avg.cases.plot2)
 
-#Are these mean zeroes because stores don'tg carry them?
+#Are these mean zeroes because stores don't carry them?
 
 storeplot <- function(strnmbr) {
 
@@ -230,8 +158,54 @@ ggplotly(storeplot(1081))
 ggplotly(storeplot(1297))
 ggplotly(storeplot(3877))
 
-wk7 %>% 
+wk7.ccbf.instocks %>% 
   ggplot(aes(x = Weekly.AM.Order.Units, y = Weekly.GRS.Order.Units)) +
-  geom_jitter() #+
+  geom_jitter() +
+  xlab("AM Order Units") +
+  ylab("GRS Order Units") #+
   xlim(0,50) +
   ylim(0,50)
+
+wk7.instocks %>% 
+    ggplot(aes(x = Weekly.AM.Order.Units, y = Weekly.GRS.Order.Units)) +
+    geom_jitter() +
+    xlab("AM Order Units") +
+    ylab("GRS Order Units") #+
+  xlim(0,50) +
+    ylim(0,50)
+  
+#CCBF GRS orders out of stocks
+wk7.ccbf %>% 
+  filter(Weekly.Unit.Sales == 0 & Weekly.Units.On.Hand == 0 & Weekly.AM.Order.Units == 0) %>% 
+  select(Store, City, Pack, Brand, Weekly.Unit.Sales, Weekly.Units.On.Hand, Weekly.AM.Order.Units, Weekly.GRS.Order.Units, Case.Difference)
+
+#Function to calculate interesting metrics for each dataset----
+CAO <- function(df) {
+  Percent.Perfect.Match = df %>% 
+    filter(Case.Difference == 0) %>% 
+    count() / nrow(df) * 100
+  
+  Percent.Perfect.Match <- rename(Percent.Perfect.Match, Percent.Perfect.Match = n)
+  
+  ME = mean(df$Case.Difference)
+  
+  RMSE = sqrt(mean((df$Weekly.AM.Order.Units - df$Weekly.GRS.Order.Units)^2))
+  
+  RAE = rae(df$Weekly.AM.Order.Units, df$Weekly.GRS.Order.Units)
+  
+  RSE = rse(df$Weekly.AM.Order.Units, df$Weekly.GRS.Order.Units)
+  
+  MAE = mean(abs(df$Case.Difference))
+  
+  vec <- cbind(Percent.Perfect.Match, ME, MAE, RMSE, RAE, RSE)
+  
+  return(vec)
+}
+
+CAO(wk7)
+CAO(wk7.ccbf)
+CAO(wk7.instocks)
+CAO(wk7.ccbf.instocks)
+
+#Function to calculate interesting metrics for each product----
+
