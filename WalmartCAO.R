@@ -39,7 +39,7 @@ wk7.ccbf
 wk7.instocks
 wk7.ccbf.instocks
 
-#any differences between factors of various treatments
+#function to visualize difference between levels of various treatments----
 CAOplot <- function(df, xax, yax){
 df %>% 
   ggplot(aes(x = xax, y = yax, color = xax)) +
@@ -47,42 +47,36 @@ df %>%
   theme(legend.position="none")
 }
 
+#applications of above function----
+#diff in bottlers?
 CAOplot(wk7.instocks, wk7.instocks$OWNER, wk7.instocks$Case.Difference)
 
+#diff in store numbers in ccbf territory?
 CAOplot(wk7.ccbf.instocks, as.factor(wk7.ccbf.instocks$Store), wk7.ccbf.instocks$Case.Difference) + xlab("Store number") + ylab("Case Differences")
 
 #what is the big one in 767?
-wk7.CCBF %>% 
+wk7.ccbf %>% 
   filter(Store == "767") %>% 
   filter(Case.Difference == max(Case.Difference)) %>% 
   select(Beverage.Product.Description, Pack)
 #This is a consistently high order based on MM data
 
 #small one in 538?
-wk7.CCBF %>% 
+wk7.ccbf %>% 
   filter(Store == "538") %>% 
   filter(Case.Difference == min(Case.Difference)) %>% 
   select(Beverage.Category, Pack)
 
 #big in 1081?
-wk7.CCBF %>% 
+wk7.ccbf %>% 
   filter(Store == "1081") %>% 
   filter(Case.Difference == max(Case.Difference)) %>% 
   select(Beverage.Product.Description, Pack)
 
-#Do results vary by city?
-wk7.CCBF %>% 
-  ggplot(aes(x = City, y = Case.Difference, color = City)) +
-  geom_boxplot(outlier.size = 2) +
-  theme(legend.position="none") +
-  ylab("Case Difference")
+#Do results vary by city in ccbf territory?
+CAOplot(wk7.ccbf.instocks, as.factor(wk7.ccbf.instocks$City), wk7.ccbf.instocks$Case.Difference) + xlab("Store number") + ylab("Case Differences")
 
-wk7.ccbf.instocks %>% 
-  ggplot(aes(x = City, y = Case.Difference, color = City)) +
-  geom_boxplot() +
-  theme(legend.position="none")
-
-#Cases per product
+#Case differences per product per product----
 avg.cases <- wk7.ccbf.instocks %>% 
   group_by(Item.Nbr) %>% 
   summarise(meanAM = mean(Weekly.AM.Order.Units), 
@@ -92,6 +86,8 @@ avg.cases <- wk7.ccbf.instocks %>%
             sdCAO = sd(Weekly.GRS.Order.Units)) %>% 
   arrange(desc(meanAM)) %>% 
   mutate(rank = c(152:1))
+
+avg.cases
 
 itmnmbr.avg.case.join <- itmnmbr %>% 
   select(Item.Nbr, Retail.Package.Group, Beverage.Product.Description)
@@ -112,10 +108,12 @@ avg.cases.plot <- avg.cases %>%
   scale_y_continuous(breaks=seq(0, 400, 10)) +
   scale_color_gradient2() +
   theme(panel.background = element_rect(color = NA, fill = "dark gray")) +
-  xlab("Products ordered AM sales units") +
+  xlab("Rank by average unit sales") +
   ylab("Average sales by product (5 stores)")
 
+#Average order (with SD) colored by average case difference
 ggplotly(avg.cases.plot)
+#shows that products with higher average order units have more variability in case difference
 
 avg.cases.plot2 <- avg.cases %>%
   ggplot() +
@@ -128,8 +126,7 @@ avg.cases.plot2 <- avg.cases %>%
   ylab("Average sales by product (black points average GRS order)")
 
 ggplotly(avg.cases.plot2)
-
-#Are these mean zeroes because stores don't carry them?
+#shows actual difference. Black points to the left of the line are predictions that are UNDERordered, to the right OVERordered.
 
 storeplot <- function(strnmbr) {
 
@@ -152,32 +149,32 @@ wk7.ccbf.instocks %>%
     ylab("Average sales by product (black points average GRS order)")
 }
 
+#the above plot by store
 ggplotly(storeplot(538))
 ggplotly(storeplot(767))
 ggplotly(storeplot(1081))
 ggplotly(storeplot(1297))
 ggplotly(storeplot(3877))
 
+#regression of AM order units by CAO order units first for our stores then by all stores. Using only instock items----
+#go to Tableau for zooming in.
 wk7.ccbf.instocks %>% 
   ggplot(aes(x = Weekly.AM.Order.Units, y = Weekly.GRS.Order.Units)) +
   geom_jitter() +
   xlab("AM Order Units") +
-  ylab("GRS Order Units") #+
-  xlim(0,50) +
-  ylim(0,50)
-
+  ylab("GRS Order Units")
+  
 wk7.instocks %>% 
     ggplot(aes(x = Weekly.AM.Order.Units, y = Weekly.GRS.Order.Units)) +
     geom_jitter() +
     xlab("AM Order Units") +
-    ylab("GRS Order Units") #+
-  xlim(0,50) +
-    ylim(0,50)
+    ylab("GRS Order Units") 
   
-#CCBF GRS orders out of stocks
+#CCBF GRS orders out of stocks----
 wk7.ccbf %>% 
   filter(Weekly.Unit.Sales == 0 & Weekly.Units.On.Hand == 0 & Weekly.AM.Order.Units == 0) %>% 
   select(Store, City, Pack, Brand, Weekly.Unit.Sales, Weekly.Units.On.Hand, Weekly.AM.Order.Units, Weekly.GRS.Order.Units, Case.Difference)
+#manual inspection of previous sales data reveals these items are not carried by these stores
 
 #Function to calculate interesting metrics for each dataset----
 CAO <- function(df) {
@@ -197,7 +194,11 @@ CAO <- function(df) {
   
   MAE = mean(abs(df$Case.Difference))
   
-  vec <- cbind(Percent.Perfect.Match, ME, MAE, RMSE, RAE, RSE)
+  COD = summary(lm(df$Weekly.GRS.Order.Units ~ df$Weekly.AM.Order.Units))$r.squared
+  
+  vec = cbind(Percent.Perfect.Match, ME, MAE, RMSE, RAE, RSE, COD)
+  
+  #Add R^2
   
   return(vec)
 }
