@@ -34,10 +34,30 @@ wk7.ccbf.instocks <- wk7 %>%
   filter(OWNER == "CCBF") %>% 
   filter(Weekly.Unit.Sales != 0 & Weekly.Units.On.Hand != 0 & Weekly.AM.Order.Units > 0)
 
-wk7
-wk7.ccbf
+wk7 #ignore this one, only use instocks
+wk7.ccbf #and this one, only use instocks
 wk7.instocks
 wk7.ccbf.instocks
+
+#restrict each to top 93.5% of orders
+hist(wk7.instocks$Weekly.AM.Order.Units, breaks = 600)
+quantile(wk7.instocks$Weekly.AM.Order.Units, 0.935)
+
+wk7.instocks$Weekly.AM.Order.Units[wk7.instocks$Weekly.AM.Order.Units>96] <- 96
+wk7.instocks$Weekly.GRS.Order.Units[wk7.instocks$Weekly.GRS.Order.Units>96] <- 96
+
+hist(wk7.instocks$Weekly.AM.Order.Units, breaks = 100)
+
+hist(wk7.ccbf.instocks$Weekly.AM.Order.Units, breaks = 450)
+quantile(wk7.ccbf.instocks$Weekly.AM.Order.Units, 0.935)
+
+wk7.ccbf.instocks$Weekly.AM.Order.Units[wk7.ccbf.instocks$Weekly.AM.Order.Units>96] <- 96
+wk7.ccbf.instocks$Weekly.GRS.Order.Units[wk7.ccbf.instocks$Weekly.GRS.Order.Units>96] <- 96
+
+hist(wk7.ccbf.instocks$Weekly.AM.Order.Units, breaks = 100)
+
+write.table(wk7.ccbf.instocks, "ccbf7.csv", col.names=TRUE, sep=",")
+write.table(wk7.ccbf.instocks, "all7.csv", col.names=TRUE, sep=",")
 
 #function to visualize difference between levels of various treatments----
 CAOplot <- function(df, xax, yax){
@@ -194,17 +214,17 @@ CAO <- function(df) {
   
   MAE = mean(abs(df$Case.Difference))
   
-  COD = summary(lm(df$Weekly.GRS.Order.Units ~ df$Weekly.AM.Order.Units))$r.squared
+  CoD = summary(lm(df$Weekly.GRS.Order.Units ~ df$Weekly.AM.Order.Units))$r.squared
   
-  vec = cbind(Percent.Perfect.Match, ME, MAE, RMSE, RAE, RSE, COD)
+  vec = cbind(Percent.Perfect.Match, ME, MAE, RMSE, RAE, RSE, CoD)
   
   #Add R^2
   
   return(vec)
 }
 
-CAO(wk7)
-CAO(wk7.ccbf)
+#CAO(wk7)
+#CAO(wk7.ccbf)
 CAO(wk7.instocks)
 CAO(wk7.ccbf.instocks)
 
@@ -217,9 +237,15 @@ product_metrics <- wk7.ccbf.instocks %>%
     RMSE = sqrt(mean((Weekly.AM.Order.Units - Weekly.GRS.Order.Units)^2)),
     RAE = rae(Weekly.AM.Order.Units, Weekly.GRS.Order.Units),
     RSE = rse(Weekly.AM.Order.Units, Weekly.GRS.Order.Units),
-    MAE = mean(abs(Case.Difference))
+    MAE = mean(abs(Case.Difference)),
+    CoD = summary(lm(Weekly.GRS.Order.Units ~ Weekly.AM.Order.Units))$r.squared
   ) %>% 
   arrange(desc(RMSE))
 
-#Why inf for some?
+product_metrics
+#NaNs produced from zeroes in GRS units.
+#Why inf for some?----
+
 wk7.ccbf.instocks %>%  filter(Beverage.Product.Description == "Powerade Lemon Lime") %>% select(Weekly.AM.Order.Units, Weekly.GRS.Order.Units)
+
+wk7.ccbf.instocks %>%  filter(Beverage.Product.Description == "Vanilla Coke") %>% select(Weekly.AM.Order.Units, Weekly.GRS.Order.Units)
