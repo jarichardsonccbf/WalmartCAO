@@ -227,7 +227,7 @@ no.carry <- wk7 %>%
 
 no.carry
 
-write.csv(no.carry, "no.carry.csv")
+#write.csv(no.carry, "no.carry.csv")
 #manual inspection of previous sales data reveals these items are not carried by these stores
 
 #Function to calculate interesting metrics for each dataset----
@@ -261,10 +261,11 @@ CAO(wk7.instocks)
 CAO(wk7.ccbf.instocks)
 
 #Function to calculate interesting metrics for each product----
-product_metrics <- wk7.ccbf.instocks %>% 
+product_metrics7 <- wk7.ccbf.instocks %>% 
   unite(PRODUCT, Brand, Pack) %>% 
   group_by(PRODUCT) %>% 
   summarise(
+    count = n(),
     ME = mean(Case.Difference),
     RMSE = sqrt(mean((Weekly.AM.Order.Units - Weekly.GRS.Order.Units)^2)),
     RAE = rae(Weekly.AM.Order.Units, Weekly.GRS.Order.Units),
@@ -272,8 +273,10 @@ product_metrics <- wk7.ccbf.instocks %>%
     MAE = mean(abs(Case.Difference)),
     CoD = summary(lm(Weekly.GRS.Order.Units ~ Weekly.AM.Order.Units))$r.squared
   ) %>% 
-  arrange(desc(RMSE))
+  arrange(desc(MAE))
 
-product_metrics
+write.csv(product_metrics7 %>% 
+            select(PRODUCT, count, ME, MAE), "week7casesproduct.csv")
+  
 #NaNs produced from zeroes in GRS units.
 #Why inf for some?----
