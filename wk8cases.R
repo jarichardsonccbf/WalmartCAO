@@ -3,62 +3,68 @@ library(tidyverse)
 library(plotly)
 library(Metrics)
 
+#this one for doing CASES ordered
+
 #data preprocessing----
-wk7.units.cases <- read.csv("CAOWeek7units.csv", stringsAsFactors = FALSE)
-
-wk7 <- read.csv("WalmartCAOweek7.csv", stringsAsFactors = FALSE)
-
 itmnmbr <- read.csv("itmnmbr.upc.csv", stringsAsFactors = FALSE)
 itmnmbr <- itmnmbr %>% 
   rename(Item.Nbr = Item.Number)
 
-wk7 <- wk7 %>% 
-  left_join(itmnmbr, "Item.Nbr")
+units.case <- read.csv("CAOWeek7units.csv", stringsAsFactors = FALSE)
 
-#df subsets
+units.per.case <- units.case %>% 
+  mutate(Units.per.case = Units.Ordered..SUM./Cases.Ordered..SUM.) %>% 
+  select(Pack, Units.per.case) %>% 
+  distinct()
 
-#just CCBF
-# wk7.ccbf <- wk7 %>% 
-#   filter(OWNER == "CCBF")
+wk8 <- read.csv("WalmartCAOweek8.csv", stringsAsFactors = FALSE)
+
+#convert units to cases
+wk8 <- wk8 %>% 
+  left_join(units.per.case, "Pack") %>% 
+  mutate(Weekly.AM.Order.Units = Weekly.AM.Order.Units/Units.per.case) %>%
+  mutate(Weekly.GRS.Order.Units = Weekly.GRS.Order.Units/Units.per.case) %>% na.omit()
 
 #just in stocks
-wk7.instocks <- wk7 %>% 
-  filter(Weekly.Unit.Sales != 0 & Weekly.Units.On.Hand != 0 & Weekly.AM.Order.Units > 0)
+wk8.instocks <- wk8 %>% 
+  filter(!(Weekly.Unit.Sales == 0 & Weekly.Units.On.Hand == 0 & Weekly.AM.Order.Units == 0))
 
-#ccbd all
-wk7.ccbf <-  wk7 %>% 
-  filter(OWNER == "CCBF")
-
-#double check this
 #ccbf instocks
-wk7.ccbf.instocks <- wk7 %>% 
+wk8.ccbf.instocks <- wk8 %>% 
   filter(OWNER == "CCBF") %>% 
   filter(!(Weekly.Unit.Sales == 0 & Weekly.Units.On.Hand == 0 & Weekly.AM.Order.Units == 0))
 
-#wk7 #ignore this one, only use instocks
-#wk7.ccbf #and this one, only use instocks
-wk7.instocks
-wk7.ccbf.instocks
-
+wk8.instocks
+wk8.ccbf.instocks
 
 #restrict each to top 93.5% of orders
 #all
-wk7.instocks %>% 
-ggplot(aes(x=Weekly.AM.Order.Units)) + geom_histogram(bins = 600) +
+wk8.instocks %>% 
+  ggplot(aes(x=Weekly.AM.Order.Units)) + geom_histogram(bins = 600) +
   xlab("AM order units")
 
-quantile(wk7.instocks$Weekly.AM.Order.Units, 0.935)
+quantile(wk8.instocks$Weekly.AM.Order.Units, 0.935)
 
-wk7.instocks$Weekly.AM.Order.Units[wk7.instocks$Weekly.AM.Order.Units>96] <- 96
-wk7.instocks$Weekly.GRS.Order.Units[wk7.instocks$Weekly.GRS.Order.Units>96] <- 96
+wk8.instocks$Weekly.AM.Order.Units[wk8.instocks$Weekly.AM.Order.Units>24] <- 24
 
-wk7.instocks %>% 
-  ggplot(aes(x=Weekly.AM.Order.Units)) + geom_histogram(bins = 100) +
-  xlab("AM order units")
+wk8.instocks$Weekly.AM.Order.Units[wk8.instocks$Weekly.AM.Order.Units< (-5)]
 
-wk7.instocks %>% 
-  ggplot(aes(x=Weekly.GRS.Order.Units)) + geom_histogram(bins = 100) +
-  xlab("GRS order units")
+wk8.instocks$Weekly.AM.Order.Units[wk8.instocks$Weekly.AM.Order.Units< (-10)] <- -10
+
+
+wk8.instocks$Weekly.GRS.Order.Units[wk8.instocks$Weekly.GRS.Order.Units>24] <- 24
+
+wk8.instocks %>% 
+  ggplot(aes(x=Weekly.AM.Order.Units)) + geom_histogram(bins = 35) +
+  xlab("AM order units") + 
+  coord_cartesian(ylim=c(0,3000),xlim=c(0,25))
+
+wk8.instocks %>% 
+  ggplot(aes(x=Weekly.GRS.Order.Units)) + geom_histogram(bins = 25) +
+  xlab("GRS order units") +
+  coord_cartesian(ylim=c(0,3000))
+
+table(wk8.instocks$Weekly.GRS.Order.Units)
 
 #ccbf
 wk7.ccbf.instocks %>% 
@@ -67,8 +73,8 @@ wk7.ccbf.instocks %>%
 
 quantile(wk7.ccbf.instocks$Weekly.AM.Order.Units, 0.935)
 
-wk7.ccbf.instocks$Weekly.AM.Order.Units[wk7.ccbf.instocks$Weekly.AM.Order.Units>96] <- 96
-wk7.ccbf.instocks$Weekly.GRS.Order.Units[wk7.ccbf.instocks$Weekly.GRS.Order.Units>96] <- 96
+wk7.ccbf.instocks$Weekly.AM.Order.Units[wk7.ccbf.instocks$Weekly.AM.Order.Units>29] <-29
+wk7.ccbf.instocks$Weekly.GRS.Order.Units[wk7.ccbf.instocks$Weekly.GRS.Order.Units>29] <- 29
 
 wk7.ccbf.instocks %>% 
   ggplot(aes(x=Weekly.AM.Order.Units)) + geom_histogram(bins = 100) +
@@ -78,15 +84,15 @@ wk7.ccbf.instocks %>%
   ggplot(aes(x=Weekly.GRS.Order.Units)) + geom_histogram(bins = 100) +
   xlab("GRS order units")
 
-# write.csv(wk7.ccbf.instocks, "ccbf7.csv")
-# write.csv(wk7.instocks, "all7.csv")
+# write.csv(wk7.ccbf.instocks, "ccbf7cases.csv")
+write.csv(wk8.instocks, "all8cases.csv")
 
 #function to visualize difference between levels of various treatments----
 CAOplot <- function(df, xax, yax){
-df %>% 
-  ggplot(aes(x = xax, y = yax, color = xax)) +
-  geom_boxplot(outlier.size = 2) +
-  theme(legend.position="none")
+  df %>% 
+    ggplot(aes(x = xax, y = yax, color = xax)) +
+    geom_boxplot(outlier.size = 2) +
+    theme(legend.position="none")
 }
 
 #applications of above function----
@@ -127,7 +133,7 @@ avg.cases <- wk7.ccbf.instocks %>%
             meanCAO = mean(Weekly.GRS.Order.Units),
             sdCAO = sd(Weekly.GRS.Order.Units)) %>% 
   arrange(desc(meanAM)) %>% 
-  mutate(rank = c(152:1))
+  mutate(rank = c(148:1))
 
 avg.cases
 
@@ -171,12 +177,12 @@ ggplotly(avg.cases.plot2)
 #shows actual difference. Black points to the left of the line are predictions that are UNDERordered, to the right OVERordered.
 
 storeplot <- function(strnmbr) {
-
-i = wk7.ccbf.instocks %>% 
+  
+  i = wk7.ccbf.instocks %>% 
     filter(Store == strnmbr) %>% 
     nrow()  
   
-wk7.ccbf.instocks %>% 
+  wk7.ccbf.instocks %>% 
     unite(product, Brand, Pack) %>% 
     filter(Store == strnmbr) %>% 
     arrange(desc(Weekly.AM.Order.Units)) %>%
@@ -200,7 +206,7 @@ ggplotly(storeplot(3877))
 
 #regression of AM order units by CAO order units first for our stores then by all stores. Using only instock items----
 #go to Tableau for zooming in.
-wk7.instocks %>% 
+wk8.instocks %>% 
   ggplot(aes(x = Weekly.AM.Order.Units, y = Weekly.GRS.Order.Units)) +
   geom_jitter() +
   xlab("AM Order Units") +
@@ -211,14 +217,16 @@ wk7.ccbf.instocks %>%
   geom_jitter() +
   xlab("AM Order Units") +
   ylab("GRS Order Units")
-  
+
 #CCBF GRS orders out of stocks----
-no.carry <- wk7 %>%
+no.carry <- wk8 %>%
   filter(OWNER == "CCBF") %>% 
   filter(Weekly.Unit.Sales == 0 & Weekly.Units.On.Hand == 0 & Weekly.AM.Order.Units == 0) %>% 
   select(Store, City, Pack, Brand, Weekly.GRS.Order.Units, Case.Difference)
 
-#write.csv(no.carry, "no.carry.csv")
+no.carry
+
+write.csv(no.carry, "no.carry.csv")
 #manual inspection of previous sales data reveals these items are not carried by these stores
 
 #Function to calculate interesting metrics for each dataset----
@@ -246,19 +254,16 @@ CAO <- function(df) {
   return(vec)
 }
 
-#CAO(wk7)
-wk7.ccbf %>% 
-  filter(Weekly.AM.Order.Units == 0 & Weekly.Units.On.Hand == 0 & Weekly.Unit.Sales == 0)
-CAO(wk7.ccbf)
-CAO(wk7.instocks)
-CAO(wk7.ccbf.instocks)
+#CAO(wk8)
+#CAO(wk7.ccbf)
+CAO(wk8.instocks)
+CAO(wk8.ccbf.instocks)
 
 #Function to calculate interesting metrics for each product----
 product_metrics <- wk7.ccbf.instocks %>% 
   unite(PRODUCT, Brand, Pack) %>% 
   group_by(PRODUCT) %>% 
   summarise(
-    Count = n(),
     ME = mean(Case.Difference),
     RMSE = sqrt(mean((Weekly.AM.Order.Units - Weekly.GRS.Order.Units)^2)),
     RAE = rae(Weekly.AM.Order.Units, Weekly.GRS.Order.Units),
@@ -266,21 +271,8 @@ product_metrics <- wk7.ccbf.instocks %>%
     MAE = mean(abs(Case.Difference)),
     CoD = summary(lm(Weekly.GRS.Order.Units ~ Weekly.AM.Order.Units))$r.squared
   ) %>% 
-  arrange(desc(MAE))
+  arrange(desc(RMSE))
 
 product_metrics
-#inf produced from zeroes in GRS units with 1 count
-#NaNs produced from zeries in GRS with >1 count
-
-temp <- wk7.ccbf.instocks %>% 
-  unite(PRODUCT, Brand, Pack)
-
-#NaNs
-temp %>% 
-  filter(PRODUCT == "Cherry Coke_12FP12 - FRIDGE PACK CANS") %>% 
-  select(Weekly.AM.Order.Units, Weekly.GRS.Order.Units)
-
-#Inf
-temp %>% 
-  filter(PRODUCT == "caffeine-free diet Coke_12C24 - 24PAKCN") %>% 
-  select(Weekly.AM.Order.Units, Weekly.GRS.Order.Units)
+#NaNs produced from zeroes in GRS units.
+#Why inf for some?----

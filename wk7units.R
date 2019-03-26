@@ -67,8 +67,8 @@ wk7.ccbf.instocks %>%
 
 quantile(wk7.ccbf.instocks$Weekly.AM.Order.Units, 0.935)
 
-wk7.ccbf.instocks$Weekly.AM.Order.Units[wk7.ccbf.instocks$Weekly.AM.Order.Units>96] <- 96
-wk7.ccbf.instocks$Weekly.GRS.Order.Units[wk7.ccbf.instocks$Weekly.GRS.Order.Units>96] <- 96
+wk7.ccbf.instocks$Weekly.AM.Order.Units[wk7.ccbf.instocks$Weekly.AM.Order.Units>83] <- 83
+wk7.ccbf.instocks$Weekly.GRS.Order.Units[wk7.ccbf.instocks$Weekly.GRS.Order.Units>83] <- 83
 
 wk7.ccbf.instocks %>% 
   ggplot(aes(x=Weekly.AM.Order.Units)) + geom_histogram(bins = 100) +
@@ -91,112 +91,112 @@ df %>%
 
 #applications of above function----
 #diff in bottlers?
-CAOplot(wk7.instocks, wk7.instocks$OWNER, wk7.instocks$Case.Difference)
-
-#diff in store numbers in ccbf territory?
-CAOplot(wk7.ccbf.instocks, as.factor(wk7.ccbf.instocks$Store), wk7.ccbf.instocks$Case.Difference) + xlab("Store number") + ylab("Case Differences")
+# CAOplot(wk7.instocks, wk7.instocks$OWNER, wk7.instocks$Case.Difference)
+# 
+# #diff in store numbers in ccbf territory?
+# CAOplot(wk7.ccbf.instocks, as.factor(wk7.ccbf.instocks$Store), wk7.ccbf.instocks$Case.Difference) + xlab("Store number") + ylab("Case Differences")
 
 #what is the big one in 767?
-wk7.ccbf.instocks %>% 
-  filter(Store == "767") %>% 
-  filter(Case.Difference == max(Case.Difference)) %>% 
-  select(Brand, Pack)
-#This is a consistently high order based on MM data
-
-#small one in 538?
-wk7.ccbf.instocks %>% 
-  filter(Store == "538") %>% 
-  filter(Case.Difference == min(Case.Difference)) %>% 
-  select(Brand, Pack)
-
-#big in 1081?
-wk7.ccbf.instocks %>% 
-  filter(Store == "1081") %>% 
-  filter(Case.Difference == max(Case.Difference)) %>% 
-  select(Brand, Pack)
+# wk7.ccbf.instocks %>% 
+#   filter(Store == "767") %>% 
+#   filter(Case.Difference == max(Case.Difference)) %>% 
+#   select(Brand, Pack)
+# #This is a consistently high order based on MM data
+# 
+# #small one in 538?
+# wk7.ccbf.instocks %>% 
+#   filter(Store == "538") %>% 
+#   filter(Case.Difference == min(Case.Difference)) %>% 
+#   select(Brand, Pack)
+# 
+# #big in 1081?
+# wk7.ccbf.instocks %>% 
+#   filter(Store == "1081") %>% 
+#   filter(Case.Difference == max(Case.Difference)) %>% 
+#   select(Brand, Pack)
 
 #Do results vary by city in ccbf territory?
-CAOplot(wk7.ccbf.instocks, as.factor(wk7.ccbf.instocks$City), wk7.ccbf.instocks$Case.Difference) + xlab("Store number") + ylab("Case Differences")
+# CAOplot(wk7.ccbf.instocks, as.factor(wk7.ccbf.instocks$City), wk7.ccbf.instocks$Case.Difference) + xlab("Store number") + ylab("Case Differences")
 
 #Case differences per product per product----
-avg.cases <- wk7.ccbf.instocks %>% 
-  group_by(Item.Nbr) %>% 
-  summarise(meanAM = mean(Weekly.AM.Order.Units), 
-            sd = sd(Weekly.AM.Order.Units),
-            meanCD = mean(abs(Case.Difference)),
-            meanCAO = mean(Weekly.GRS.Order.Units),
-            sdCAO = sd(Weekly.GRS.Order.Units)) %>% 
-  arrange(desc(meanAM)) %>% 
-  mutate(rank = c(152:1))
+# avg.cases <- wk7.ccbf.instocks %>% 
+#   group_by(Item.Nbr) %>% 
+#   summarise(meanAM = mean(Weekly.AM.Order.Units), 
+#             sd = sd(Weekly.AM.Order.Units),
+#             meanCD = mean(abs(Case.Difference)),
+#             meanCAO = mean(Weekly.GRS.Order.Units),
+#             sdCAO = sd(Weekly.GRS.Order.Units)) %>% 
+#   arrange(desc(meanAM)) %>% 
+#   mutate(rank = c(159:1))
+# 
+# avg.cases
+# 
+# itmnmbr.avg.case.join <- itmnmbr %>% 
+#   select(Item.Nbr, Retail.Package.Group, Beverage.Product.Description)
+# 
+# avg.cases$sd[avg.cases$sd=="NaN"] <- 0
+# 
+# avg.cases <- avg.cases %>% 
+#   left_join(itmnmbr.avg.case.join, key = "Item.Nbr") %>% 
+#   unite(product, Beverage.Product.Description, Retail.Package.Group)
+# 
+# avg.cases
+# 
+# avg.cases.plot <- avg.cases %>% 
+#   ggplot(aes(y = meanAM, x = rank, color = meanCD, text = paste("Product:", product))) + 
+#   geom_point() +
+#   geom_errorbar(aes(ymin=meanAM-sd, ymax=meanAM+sd), width=.1) +
+#   coord_flip() +
+#   scale_y_continuous(breaks=seq(0, 400, 10)) +
+#   scale_color_gradient2() +
+#   theme(panel.background = element_rect(color = NA, fill = "dark gray")) +
+#   xlab("Rank by average unit sales") +
+#   ylab("Average sales by product (5 stores)")
+# 
+# #Average order (with SD) colored by average case difference
+# ggplotly(avg.cases.plot)
+# #shows that products with higher average order units have more variability in case difference
 
-avg.cases
-
-itmnmbr.avg.case.join <- itmnmbr %>% 
-  select(Item.Nbr, Retail.Package.Group, Beverage.Product.Description)
-
-avg.cases$sd[avg.cases$sd=="NaN"] <- 0
-
-avg.cases <- avg.cases %>% 
-  left_join(itmnmbr.avg.case.join, key = "Item.Nbr") %>% 
-  unite(product, Beverage.Product.Description, Retail.Package.Group)
-
-avg.cases
-
-avg.cases.plot <- avg.cases %>% 
-  ggplot(aes(y = meanAM, x = rank, color = meanCD, text = paste("Product:", product))) + 
-  geom_point() +
-  geom_errorbar(aes(ymin=meanAM-sd, ymax=meanAM+sd), width=.1) +
-  coord_flip() +
-  scale_y_continuous(breaks=seq(0, 400, 10)) +
-  scale_color_gradient2() +
-  theme(panel.background = element_rect(color = NA, fill = "dark gray")) +
-  xlab("Rank by average unit sales") +
-  ylab("Average sales by product (5 stores)")
-
-#Average order (with SD) colored by average case difference
-ggplotly(avg.cases.plot)
-#shows that products with higher average order units have more variability in case difference
-
-avg.cases.plot2 <- avg.cases %>%
-  ggplot() +
-  geom_point(aes(y = meanAM, x = rank, color = meanCD, text = paste("Product:", product))) +
-  geom_point(aes(y = meanCAO, x = rank, text = paste("Product:", product)))+
-  coord_flip() +
-  scale_y_continuous(breaks=seq(0, 400, 10)) +
-  scale_color_gradient2() +
-  theme(panel.background = element_rect(color = NA, fill = "dark gray")) +    xlab("Products ordered AM sales units") +
-  ylab("Average sales by product (black points average GRS order)")
-
-ggplotly(avg.cases.plot2)
+# avg.cases.plot2 <- avg.cases %>%
+#   ggplot() +
+#   geom_point(aes(y = meanAM, x = rank, color = meanCD, text = paste("Product:", product))) +
+#   geom_point(aes(y = meanCAO, x = rank, text = paste("Product:", product)))+
+#   coord_flip() +
+#   scale_y_continuous(breaks=seq(0, 400, 10)) +
+#   scale_color_gradient2() +
+#   theme(panel.background = element_rect(color = NA, fill = "dark gray")) +    xlab("Products ordered AM sales units") +
+#   ylab("Average sales by product (black points average GRS order)")
+# 
+# ggplotly(avg.cases.plot2)
 #shows actual difference. Black points to the left of the line are predictions that are UNDERordered, to the right OVERordered.
 
-storeplot <- function(strnmbr) {
-
-i = wk7.ccbf.instocks %>% 
-    filter(Store == strnmbr) %>% 
-    nrow()  
-  
-wk7.ccbf.instocks %>% 
-    unite(product, Brand, Pack) %>% 
-    filter(Store == strnmbr) %>% 
-    arrange(desc(Weekly.AM.Order.Units)) %>%
-    mutate(rank = c(i:1)) %>% 
-    ggplot() +
-    geom_point(aes(y = Weekly.AM.Order.Units, x = rank, color = abs(Case.Difference), text = paste("Product:", product))) +
-    geom_point(aes(y = Weekly.GRS.Order.Units, x = rank, text = paste("Product:", product)))+
-    coord_flip() +
-    scale_y_continuous(breaks=seq(0, 400, 10)) +
-    scale_color_gradient2() +
-    theme(panel.background = element_rect(color = NA, fill = "dark gray")) +    xlab("Products ordered AM sales units") +
-    ylab("Average sales by product (black points average GRS order)")
-}
-
-#the above plot by store
-ggplotly(storeplot(538))
-ggplotly(storeplot(767))
-ggplotly(storeplot(1081))
-ggplotly(storeplot(1297))
-ggplotly(storeplot(3877))
+# storeplot <- function(strnmbr) {
+# 
+# i = wk7.ccbf.instocks %>% 
+#     filter(Store == strnmbr) %>% 
+#     nrow()  
+#   
+# wk7.ccbf.instocks %>% 
+#     unite(product, Brand, Pack) %>% 
+#     filter(Store == strnmbr) %>% 
+#     arrange(desc(Weekly.AM.Order.Units)) %>%
+#     mutate(rank = c(i:1)) %>% 
+#     ggplot() +
+#     geom_point(aes(y = Weekly.AM.Order.Units, x = rank, color = abs(Case.Difference), text = paste("Product:", product))) +
+#     geom_point(aes(y = Weekly.GRS.Order.Units, x = rank, text = paste("Product:", product)))+
+#     coord_flip() +
+#     scale_y_continuous(breaks=seq(0, 400, 10)) +
+#     scale_color_gradient2() +
+#     theme(panel.background = element_rect(color = NA, fill = "dark gray")) +    xlab("Products ordered AM sales units") +
+#     ylab("Average sales by product (black points average GRS order)")
+# }
+# 
+# #the above plot by store
+# ggplotly(storeplot(538))
+# ggplotly(storeplot(767))
+# ggplotly(storeplot(1081))
+# ggplotly(storeplot(1297))
+# ggplotly(storeplot(3877))
 
 #regression of AM order units by CAO order units first for our stores then by all stores. Using only instock items----
 #go to Tableau for zooming in.
