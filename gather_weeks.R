@@ -51,3 +51,4 @@ wk8.instocks <- wk8 %>%
 
 fullnocap <- rbind(wk7.instocks, wk8.instocks)
 write.csv(fullnocap, "allweeks.nocap.csv")
+
