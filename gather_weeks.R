@@ -37,7 +37,7 @@ wk7 <- wk7 %>%
 wk7.instocks <- wk7 %>% 
   filter(!(Weekly.Unit.Sales == 0 & Weekly.Units.On.Hand == 0 & Weekly.AM.Order.Units == 0))
 
-wk8 <- read.csv("WalmartCAOweek7.csv", stringsAsFactors = FALSE)
+wk8 <- read.csv("WalmartCAOweek8.csv", stringsAsFactors = FALSE)
 
 #convert units to cases
 wk8 <- wk8 %>% 
