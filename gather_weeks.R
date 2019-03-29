@@ -1,54 +1,39 @@
-#Get 7, 8 on one file with the 24 case cap
-wk7 <- read.csv("all7cases.csv")
-wk8 <- read.csv("all8cases.csv")
-
-full <- rbind(wk7, wk8)
-write.csv(full, "allweeks.csv")
-
-#Get 7, 8 on one file with no cap
 #package loading
 library(tidyverse)
 library(plotly)
 library(Metrics)
 
-#this one for doing CASES ordered
+#Get 7, 8 on one file
+wk7 <- read.csv("outputs/wk7.cases.csv")
+wk8 <- read.csv("outputs/wk8.cases.csv")
 
-#data preprocessing----
-itmnmbr <- read.csv("itmnmbr.upc.csv", stringsAsFactors = FALSE)
-itmnmbr <- itmnmbr %>% 
-  rename(Item.Nbr = Item.Number)
+full <- rbind(wk7, wk8)
+write.csv(full, "outputs/allweeks.csv")
 
-units.case <- read.csv("CAOWeek7units.csv", stringsAsFactors = FALSE)
+full <- full %>%
+  mutate(sort.order = Weekly.AM.Order.Cases) %>% 
+  select(-c(X, Weekly.Unit.Sales, Weekly.Units.On.Hand, Weekly.AM.Order.Units, Weekly.GRS.Order.Units))
 
-units.per.case <- units.case %>% 
-  mutate(Units.per.case = Units.Ordered..SUM./Cases.Ordered..SUM.) %>% 
-  select(Pack, Units.per.case) %>% 
-  distinct()
+one <- full %>% 
+  select(-c(Weekly.GRS.Order.Cases, Weekly.Cases.On.Hand, Weekly.Cases.Sales)) %>% 
+  mutate(count_type = "Weekly.AM.Order.Cases") %>% 
+  rename(case_count = Weekly.AM.Order.Cases)
 
-wk7 <- read.csv("WalmartCAOweek7.csv", stringsAsFactors = FALSE)
+two <- full %>% 
+  select(-c(Weekly.AM.Order.Cases, Weekly.Cases.On.Hand, Weekly.Cases.Sales)) %>% 
+  mutate(count_type = "Weekly.GRS.Order.Cases") %>% 
+rename(case_count = Weekly.GRS.Order.Cases)
 
-#convert units to cases
-wk7 <- wk7 %>% 
-  left_join(units.per.case, "Pack") %>% 
-  mutate(Weekly.AM.Order.Cases = Weekly.AM.Order.Units/Units.per.case) %>%
-  mutate(Weekly.GRS.Order.Cases = Weekly.GRS.Order.Units/Units.per.case) %>% na.omit()
+three <- full %>% 
+  select(-c(Weekly.AM.Order.Cases, Weekly.GRS.Order.Cases, Weekly.Cases.Sales)) %>% 
+  mutate(count_type = "Weekly.Cases.On.Hand") %>% 
+rename(case_count = Weekly.Cases.On.Hand)
 
-#just in stocks
-wk7.instocks <- wk7 %>% 
-  filter(!(Weekly.Unit.Sales == 0 & Weekly.Units.On.Hand == 0 & Weekly.AM.Order.Units == 0))
+four <- full %>% 
+  select(-c(Weekly.AM.Order.Cases, Weekly.GRS.Order.Cases, Weekly.Cases.On.Hand))%>% 
+  mutate(count_type = "Weekly.Cases.Sales") %>% 
+rename(case_count = Weekly.Cases.Sales)
 
-wk8 <- read.csv("WalmartCAOweek8.csv", stringsAsFactors = FALSE)
+tidyfull <- rbind(one, two, three, four)
 
-#convert units to cases
-wk8 <- wk8 %>% 
-  left_join(units.per.case, "Pack") %>% 
-  mutate(Weekly.AM.Order.Cases = Weekly.AM.Order.Units/Units.per.case) %>%
-  mutate(Weekly.GRS.Order.Cases = Weekly.GRS.Order.Units/Units.per.case) %>% na.omit()
-
-#just in stocks
-wk8.instocks <- wk8 %>% 
-  filter(!(Weekly.Unit.Sales == 0 & Weekly.Units.On.Hand == 0 & Weekly.AM.Order.Units == 0))
-
-fullnocap <- rbind(wk7.instocks, wk8.instocks)
-write.csv(fullnocap, "allweeks.nocap.csv")
-
+write.csv(tidyfull, "outputs/tidyallweeks.csv")
