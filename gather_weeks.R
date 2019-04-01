@@ -1,13 +1,12 @@
 #package loading
 library(tidyverse)
-library(plotly)
-library(Metrics)
 
-#Get 7, 8 on one file
+#Get 7, 8, 9 on one file
 wk7 <- read.csv("outputs/wk7.cases.csv")
 wk8 <- read.csv("outputs/wk8.cases.csv")
+wk9 <- read.csv("outputs/wk9.cases.csv")
 
-full <- rbind(wk7, wk8)
+full <- rbind(wk7, wk8, wk9)
 write.csv(full, "outputs/allweeks.csv")
 
 full <- full %>%
