@@ -2,29 +2,33 @@
 library(tidyverse)
 
 #data preprocessing----
+
+#import Margin Minder data, cut out the crap, and rename material number
 march.orders <- read.csv("data/marchMMorders.csv", stringsAsFactors = FALSE)
 march.orders <- march.orders %>% 
   select(-c(Dead.Net.Revenue, Customer.host.code)) %>% 
   rename(MaterialNo = Material.number)
 
+#import UPC data, get unique values as some products double up.
 UPC <- read.csv("data/UPC.csv", stringsAsFactors = FALSE)
 UPC <- UPC %>%
   rename(MaterialNo = Product.ID) %>% 
   unique()
 
-#add UPC into MM data
+#add UPC into MM data then get rid of the UPC df to clear space
 march.orders <- march.orders %>%
   left_join(UPC, "MaterialNo") %>% 
   select(-c(Each.UPC))
  
 rm(UPC)
 
+#import Walmart's item number and product description, cut out the crap and rename for joining purposes.
 walmartitms <- read.csv("data/itmnmbr.upc.csv", stringsAsFactors = FALSE)
 walmartitms <- walmartitms %>% 
   select(c(Item.Number,UPC.Number)) %>%
   rename(Case.UPC = UPC.Number)
 
-#our UPC one digit too long?
+#our UPC one digit too long, cut the last one off by converting to string, then back to numeric for joining
 march.orders$Case.UPC <- str_sub(march.orders$Case.UPC, 1, str_length(march.orders$Case.UPC)-1)
 
 march.orders$Case.UPC <- as.numeric(march.orders$Case.UPC)
@@ -33,21 +37,23 @@ march.orders$Case.UPC <- as.numeric(march.orders$Case.UPC)
 march.orders <- march.orders %>% 
   left_join(walmartitms, "Case.UPC")
 
+#get rid of body armor since not in grs yet.
 march.orders <- march.orders %>% 
   filter(!(stringr::str_detect(Product, 'BODYARMOR')))
 
-#march.mm.data
+#save march.mm.data
 #DONOTOVERWRITE!!!!write.csv(march.orders, "outputs/march.mm.data.csv")!!!
 
 march.orders <- read.csv("outputs/march.mm.data.csv", stringsAsFactors = FALSE)
 
-#Missing products from GRS (also did not appear in Walmart items spreadsheet)
-missingprod <- march.orders[is.na(march.orders$Item.Number),]
-missingprod <- missingprod %>% 
+#Missing products from Walmart GRS provided
+missing.prod <- march.orders[is.na(march.orders$Item.Number),]
+missing.prod <- missing.prod %>% 
   select(Product, Material.Description) %>% 
   unique()
-# write.csv(missingprod, "deliverables/missing.products.csv")
+# write.csv(missing.prod, "deliverables/missing.products.csv")
 
+#import walmart GRS data, select CCBF, remove crap, rename for joining
 walmartgrs <- read.csv("outputs/allweeks.csv", stringsAsFactors = FALSE)
 walmartgrs <- walmartgrs %>% 
   filter(OWNER == "CCBF") %>% 
@@ -60,11 +66,14 @@ delivered.items <- march.orders %>%
   unique() %>% 
   rename(Item.Nbr = Item.Number)
 
-wk7 <- read.csv("data/WalmartCAOweek7.csv", stringsAsFactors = FALSE)
-wk8 <- read.csv("data/WalmartCAOweek8.csv", stringsAsFactors = FALSE)
-wk9 <- read.csv("data/WalmartCAOweek9.csv", stringsAsFactors = FALSE)
+wk07 <- read.csv("data/WalmartCAOweek7.csv", stringsAsFactors = FALSE)
+wk08 <- read.csv("data/WalmartCAOweek8.csv", stringsAsFactors = FALSE)
+wk09 <- read.csv("data/WalmartCAOweek9.csv", stringsAsFactors = FALSE)
+wk10 <- read.csv("data/WalmartCAOweek10.csv", stringsAsFactors = FALSE)
+wk10 <- wk10 %>% 
+  select(-c(X..of.Change))
 
-wk.all <- rbind(wk7, wk8, wk9)
+wk.all <- rbind(wk07, wk08, wk09, wk10)
 wk.all <- wk.all %>% 
   filter(OWNER == "CCBF") %>% 
   select(Item.Nbr, Pack, Brand) %>% 

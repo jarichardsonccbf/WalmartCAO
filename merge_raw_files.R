@@ -1,3 +1,5 @@
+#merge's raw files before conversion to cases. Used for comparing to MM data
+
 library(tidyverse)
 
 wk7 <- read.csv("data/WalmartCAOweek7.csv", stringsAsFactors = FALSE)

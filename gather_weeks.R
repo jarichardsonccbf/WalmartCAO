@@ -1,15 +1,18 @@
 #package loading
 library(tidyverse)
 
-#Get 7, 8, 9 on one file
-wk7 <- read.csv("outputs/wk7.cases.csv")
-wk8 <- read.csv("outputs/wk8.cases.csv")
-wk9 <- read.csv("outputs/wk9.cases.csv")
-wk10 <- read.csv("outputs/wk9.cases.csv")
+#Get 7, 8, 9, 10 on one file
+wk07 <- read.csv("outputs/wk7.cases.csv")
+wk08 <- read.csv("outputs/wk8.cases.csv")
+wk09 <- read.csv("outputs/wk9.cases.csv")
+wk10 <- read.csv("outputs/wk10.cases.csv")
+wk10 <- wk10 %>% 
+  select(-c(X..of.Change))
 
-full <- rbind(wk7, wk8, wk9, wk10)
+full <- rbind(wk07, wk08, wk09, wk10)
 write.csv(full, "outputs/allweeks.csv")
 
+#get data tidied up, can't do simple gather, must subset dataframes then rbind
 full <- full %>%
   mutate(sort.order = Weekly.AM.Order.Cases) %>% 
   select(-c(X, Weekly.Unit.Sales, Weekly.Units.On.Hand, Weekly.AM.Order.Units, Weekly.GRS.Order.Units))
