@@ -5,8 +5,9 @@ library(tidyverse)
 wk7 <- read.csv("outputs/wk7.cases.csv")
 wk8 <- read.csv("outputs/wk8.cases.csv")
 wk9 <- read.csv("outputs/wk9.cases.csv")
+wk10 <- read.csv("outputs/wk9.cases.csv")
 
-full <- rbind(wk7, wk8, wk9)
+full <- rbind(wk7, wk8, wk9, wk10)
 write.csv(full, "outputs/allweeks.csv")
 
 full <- full %>%
