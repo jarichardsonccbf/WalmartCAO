@@ -72,8 +72,11 @@ wk09 <- read.csv("data/WalmartCAOweek9.csv", stringsAsFactors = FALSE)
 wk10 <- read.csv("data/WalmartCAOweek10.csv", stringsAsFactors = FALSE)
 wk10 <- wk10 %>% 
   select(-c(X..of.Change))
+wk11 <- read.csv("data/WalmartCAOweek11.csv", stringsAsFactors = FALSE)
+wk11 <- wk11 %>% 
+  select(-c(X..of.Change))
 
-wk.all <- rbind(wk07, wk08, wk09, wk10)
+wk.all <- rbind(wk07, wk08, wk09, wk10, wk11)
 wk.all <- wk.all %>% 
   filter(OWNER == "CCBF") %>% 
   select(Item.Nbr, Pack, Brand) %>% 
@@ -83,4 +86,3 @@ non.grs.items <- delivered.items %>%
   left_join(wk.all, "Item.Nbr")
 
 ##DONT OVERWRITE!!write.csv(non.grs.items, "deliverables/non.grs.items.csv")!!
-
