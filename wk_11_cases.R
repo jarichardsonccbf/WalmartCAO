@@ -15,7 +15,7 @@ units.per.case <- units.case %>%
   select(Pack, Units.per.case) %>% 
   distinct()
 
-wk11 <- read.csv("data/WalmartCAOweek10.csv", stringsAsFactors = FALSE)
+wk11 <- read.csv("data/WalmartCAOweek11.csv", stringsAsFactors = FALSE)
 
 #convert units to cases
 wk11pack <- wk11 %>% 
@@ -88,7 +88,7 @@ CalculateErrors(wk11.instocks)
 CalculateErrors(wk11.ccbf.instocks)
 
 #Calculate errors for products
-product_metrics10 <- wk11.ccbf.instocks %>% 
+product_metrics11 <- wk11.ccbf.instocks %>% 
   unite(PRODUCT, Brand, Pack) %>% 
   group_by(PRODUCT) %>% 
   summarise(
@@ -102,5 +102,5 @@ product_metrics10 <- wk11.ccbf.instocks %>%
   ) %>% 
   arrange(desc(MAE))
 
-write.csv(product_metrics10 %>% 
+write.csv(product_metrics11 %>% 
             select(PRODUCT, count, ME, MAE), "outputs/wk11.cases.product.error.csv")
