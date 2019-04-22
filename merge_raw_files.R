@@ -11,7 +11,10 @@ wk10 <- wk10 %>%
 wk11 <- read.csv("data/WalmartCAOweek11.csv", stringsAsFactors = FALSE)
 wk11 <- wk11 %>% 
   select(-c(X..of.Change))
+wk12 <- read.csv("data/WalmartCAOweek12.csv", stringsAsFactors = FALSE)
+wk12 <- wk12 %>% 
+  select(-c(X..of.Change))
 
-full <- rbind(wk7, wk8, wk9, wk10, wk11)
+full <- rbind(wk7, wk8, wk9, wk10, wk11, wk12)
 
 write.csv(full, "data/allweeksraw.csv")
