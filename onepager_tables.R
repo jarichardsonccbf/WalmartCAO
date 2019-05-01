@@ -75,9 +75,40 @@ yr19_NONcao_stores$Date <- yr19_NONcao_stores$Date + days(4)
 yr19_NONcao_stores$Week <- yr19_NONcao_stores$Week - 3
 arrange(yr19_NONcao_stores, Date)  
 
+CAO_stores_sales <- cbind(
 yr18_cao_stores %>% 
   group_by(Week) %>% 
   summarise(
     DNR = sum(parse_number(Dead.Net.Revenue))
     ) %>% 
-  rename(LY = DNR)
+  rename(LY_DNR = DNR),
+
+yr19_cao_stores %>% 
+  group_by(Week) %>% 
+  summarise(
+    DNR = sum(parse_number(Dead.Net.Revenue))
+    ) %>% 
+  rename(TY_DNR = DNR)
+)
+
+NON_CAO_stores_sales <- cbind(
+  yr18_NONcao_stores %>% 
+    group_by(Week) %>% 
+    summarise(
+      DNR = sum(parse_number(Dead.Net.Revenue))
+    ) %>% 
+    rename(LY_DNR = DNR),
+  
+  yr19_NONcao_stores %>% 
+    group_by(Week) %>% 
+    summarise(
+      DNR = sum(parse_number(Dead.Net.Revenue))
+    ) %>% 
+    rename(TY_DNR = DNR)
+)
+
+CAO_stores_sales
+NON_CAO_stores_sales
+
+write.table(CAO_stores_sales, "deliverables/cao_v_non_cao_sales.csv", col.names=TRUE, sep=",")
+write.table(NON_CAO_stores_sales, "deliverables/cao_v_non_cao_sales.csv", col.names=FALSE, sep=",", append=TRUE)
