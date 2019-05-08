@@ -17,8 +17,11 @@ wk12 <- wk12 %>%
 wk13 <- read.csv("outputs/wk13.cases.csv")
 wk13 <- wk13 %>% 
   select(-c(X..of.Change))
+wk14 <- read.csv("outputs/wk14.cases.csv")
+wk14 <- wk14 %>% 
+  select(-c(X..of.Change))
 
-full <- rbind(wk07, wk08, wk09, wk10, wk11, wk12, wk13)
+full <- rbind(wk07, wk08, wk09, wk10, wk11, wk12, wk13, wk14)
 write.csv(full, "outputs/allweeks.csv")
 
 # get data tidied up, can't do simple gather, must subset dataframes then rbind

@@ -81,7 +81,10 @@ wk12 <- wk12 %>%
 wk13 <- read.csv("data/WalmartCAOweek13.csv")
 wk13 <- wk13 %>% 
   select(-c(X..of.Change))
-wk.all <- rbind(wk07, wk08, wk09, wk10, wk11, wk12, wk13)
+wk14 <- read.csv("data/WalmartCAOweek14.csv")
+wk14 <- wk14 %>% 
+  select(-c(X..of.Change))
+wk.all <- rbind(wk07, wk08, wk09, wk10, wk11, wk12, wk13, wk14)
 wk.all <- wk.all %>% 
   filter(OWNER == "CCBF") %>% 
   select(Item.Nbr, Pack, Brand) %>% 
