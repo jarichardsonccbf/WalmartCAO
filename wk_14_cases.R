@@ -33,7 +33,7 @@ mon.rehab <- wk14 %>%
 
 single.g.peak <- wk14 %>% 
   filter(Pack == "18.5P1 - 18.5OZ PET SINGLE") %>% 
-  mutate(Units.per.case = 14)
+  mutate(Units.per.case = 12)
 
 # bind the manual to the automatic ones
 wk14 <- rbind(wk14pack, java.mon, mon.rehab, single.g.peak) %>% 

@@ -15,80 +15,80 @@ units.per.case <- units.case %>%
   select(Pack, Units.per.case) %>% 
   distinct()
 
-wk13 <- read.csv("data/WalmartCAOweek13.csv", stringsAsFactors = FALSE)
+wk15 <- read.csv("data/WalmartCAOweek15.csv", stringsAsFactors = FALSE)
 
 # convert units to cases
-wk13pack <- wk13 %>% 
+wk15pack <- wk15 %>% 
   left_join(units.per.case, "Pack") %>% 
   drop_na()
 
 # java monster, monster rehab, and single gold peaks don't have info on units/case, Mary Williams supplied the number 6 and 12, do these mnaually. 
-java.mon <- wk13 %>% 
+java.mon <- wk15 %>% 
   filter(Pack == "12C4 - 12OZ4PKCN") %>% 
   mutate(Units.per.case = 6)
 
-mon.rehab <- wk13 %>% 
+mon.rehab <- wk15 %>% 
   filter(Pack == "15.5C4 - 15.5OZ 4PK") %>% 
   mutate(Units.per.case = 6)
 
-single.g.peak <- wk13 %>% 
+single.g.peak <- wk15 %>% 
   filter(Pack == "18.5P1 - 18.5OZ PET SINGLE") %>% 
   mutate(Units.per.case = 12)
 
 # bind the manual to the automatic ones
-wk13 <- rbind(wk13pack, java.mon, mon.rehab, single.g.peak) %>% 
+wk15 <- rbind(wk15pack, java.mon, mon.rehab, single.g.peak) %>% 
   mutate(Weekly.AM.Order.Cases = Weekly.AM.Order.Units/Units.per.case) %>%
   mutate(Weekly.GRS.Order.Cases = Weekly.GRS.Order.Units/Units.per.case) %>% 
   mutate(Weekly.Cases.On.Hand = Weekly.Units.On.Hand/Units.per.case) %>% 
   mutate(Weekly.Cases.Sales = Weekly.Unit.Sales/Units.per.case) 
 
 # just carried by store
-wk13.instocks <- wk13 %>% 
+wk15.instocks <- wk15 %>% 
   filter(!(Weekly.Unit.Sales == 0 & Weekly.Units.On.Hand == 0 & Weekly.AM.Order.Units == 0))
 
 # ccbf instocks
-wk13.ccbf.instocks <- wk13 %>% 
+wk15.ccbf.instocks <- wk15 %>% 
   filter(OWNER == "CCBF") %>% 
   filter(!(Weekly.Unit.Sales == 0 & Weekly.Units.On.Hand == 0 & Weekly.AM.Order.Units == 0))
 
-wk13.instocks
-wk13.ccbf.instocks
+wk15.instocks
+wk15.ccbf.instocks
 
-write.csv(wk13.instocks, "outputs/wk13.cases.csv")
+write.csv(wk15.instocks, "outputs/wk15.cases.csv")
 
 # regression of AM order Cases by CAO order Cases first for our stores then by all stores. Using only instock items----
 # go to Tableau for zooming in.
-wk13.instocks %>% 
+wk15.instocks %>% 
   ggplot(aes(x = Weekly.AM.Order.Cases, y = Weekly.GRS.Order.Cases)) +
   geom_jitter() +
   xlab("AM Order Cases") +
   ylab("GRS Order Cases") 
 
-wk13.ccbf.instocks %>% 
+wk15.ccbf.instocks %>% 
   ggplot(aes(x = Weekly.AM.Order.Cases, y = Weekly.GRS.Order.Cases)) +
   geom_jitter() +
   xlab("AM Order Cases") +
   ylab("GRS Order Cases")
 
 # CCBF GRS orders for products we don't carry----
-no.carry <- wk13 %>%
+no.carry <- wk15 %>%
   filter(OWNER == "CCBF") %>% 
   filter(Weekly.Unit.Sales == 0 & Weekly.Cases.On.Hand == 0 & Weekly.AM.Order.Cases == 0) %>% 
   select(Store, City, Pack, Brand, Weekly.GRS.Order.Cases, Case.Difference)
 
 no.carry
 
-write.csv(no.carry, "outputs/CCBF.wk13.no.carry.csv")
+write.csv(no.carry, "outputs/CCBF.wk15.no.carry.csv")
 # manual inspection of previous sales data reveals these items are not carried by these stores
 
 # Calculate errors
 source("functions/functions.R")
 
-CalculateErrors(wk13.instocks)
-CalculateErrors(wk13.ccbf.instocks)
+CalculateErrors(wk15.instocks)
+CalculateErrors(wk15.ccbf.instocks)
 
 # Calculate errors for products
-product_metrics13 <- wk13.ccbf.instocks %>% 
+product_metrics15 <- wk15.ccbf.instocks %>% 
   unite(PRODUCT, Brand, Pack) %>% 
   group_by(PRODUCT) %>% 
   summarise(
@@ -102,5 +102,5 @@ product_metrics13 <- wk13.ccbf.instocks %>%
   ) %>% 
   arrange(desc(MAE))
 
-write.csv(product_metrics13 %>% 
-            select(PRODUCT, count, ME, MAE), "outputs/wk13.cases.product.error.csv")
+write.csv(product_metrics15 %>% 
+            select(PRODUCT, count, ME, MAE), "outputs/wk15.cases.product.error.csv")
