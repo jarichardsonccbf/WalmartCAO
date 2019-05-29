@@ -1,7 +1,7 @@
 # package loading
 library(tidyverse)
 
-# Get 7, 8, 9, 10 on one file
+# Get all weeks on one file
 wk07 <- read.csv("outputs/wk07.cases.csv")
 wk08 <- read.csv("outputs/wk08.cases.csv")
 wk09 <- read.csv("outputs/wk09.cases.csv")
@@ -23,8 +23,14 @@ wk14 <- wk14 %>%
 wk15 <- read.csv("outputs/wk15.cases.csv")
 wk15 <- wk15 %>% 
   select(-c(X..of.Change))
+wk16 <- read.csv("outputs/wk16.cases.csv")
+wk16 <- wk16 %>% 
+  select(-c(X..of.Change))
+wk17 <- read.csv("outputs/wk17.cases.csv")
+wk17 <- wk17 %>% 
+  select(-c(X..of.Change))
 
-full <- rbind(wk07, wk08, wk09, wk10, wk11, wk12, wk13, wk14, wk15)
+full <- rbind(wk07, wk08, wk09, wk10, wk11, wk12, wk13, wk14, wk15, wk16, wk17)
 write.csv(full, "outputs/allweeks.csv")
 
 # get data tidied up, can't do simple gather, must subset dataframes then rbind

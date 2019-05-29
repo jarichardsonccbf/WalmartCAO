@@ -5,13 +5,13 @@ library(tidyverse)
 library(lubridate)
 
 # import 18 data
-wk7_13_yr18 <- read.csv("data/walmart2018noncao_filter out CAO.csv", stringsAsFactors = FALSE)
+yr18 <- read.csv("data/walmart2018.csv", stringsAsFactors = FALSE)
 
 # import 19 data
-wk7_13_yr19 <- read.csv("data/walmart2019noncao_filter out CAO.csv", stringsAsFactors = FALSE)
+yr19 <- read.csv("data/walmart2019.csv", stringsAsFactors = FALSE)
 
 # get '18 CAO stores
-yr18_cao_stores <- wk7_13_yr18 %>% 
+yr18_cao_stores <- yr18 %>% 
   filter(Customer == "WALMART #0538 SUPERCENTER" | 
          Customer == "WALMART #0767 SUPERCENTER" |
          Customer == "WALMART #1081 SUPERCENTER" |
@@ -20,7 +20,7 @@ yr18_cao_stores <- wk7_13_yr18 %>%
   select(Date, Dead.Net.Revenue)
 
 # remove '18 CAO stores for rest
-yr18_NONcao_stores <- wk7_13_yr18 %>% 
+yr18_NONcao_stores <- yr18 %>% 
   filter(Customer != "WALMART #0538 SUPERCENTER") %>% 
   filter(Customer != "WALMART #0767 SUPERCENTER") %>%
   filter(Customer != "WALMART #1081 SUPERCENTER") %>%
@@ -29,7 +29,7 @@ yr18_NONcao_stores <- wk7_13_yr18 %>%
   select(Date, Dead.Net.Revenue)
 
 # remove '19 CAO stores
-yr19_cao_stores <- wk7_13_yr19 %>% 
+yr19_cao_stores <- yr19 %>% 
   filter(Customer == "WALMART #0538 SUPERCENTER" | 
            Customer == "WALMART #0767 SUPERCENTER" |
            Customer == "WALMART #1081 SUPERCENTER" |
@@ -38,7 +38,7 @@ yr19_cao_stores <- wk7_13_yr19 %>%
   select(Date, Dead.Net.Revenue)
 
 # remove CAO stores for '19 rest
-yr19_NONcao_stores <- wk7_13_yr19 %>% 
+yr19_NONcao_stores <- yr19 %>% 
   filter(Customer != "WALMART #0538 SUPERCENTER") %>% 
   filter(Customer != "WALMART #0767 SUPERCENTER") %>%
   filter(Customer != "WALMART #1081 SUPERCENTER") %>%
