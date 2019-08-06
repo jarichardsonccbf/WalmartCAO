@@ -61,6 +61,9 @@ yr18_NONcao_stores$Date <- yr18_NONcao_stores$Date + days(5)
 yr18_NONcao_stores$Week <- yr18_NONcao_stores$Week - 3
 arrange(yr18_NONcao_stores, Date) 
 
+#weird data point, omit
+yr18_NONcao_stores <- head(arrange(yr18_NONcao_stores, Date),-1)
+
 yr19_cao_stores$Date <- as.Date(yr19_cao_stores$Date)
 yr19_cao_stores$Date <- yr19_cao_stores$Date - days(4)
 yr19_cao_stores$Week <- week(yr19_cao_stores$Date)

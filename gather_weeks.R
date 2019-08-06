@@ -1,64 +1,55 @@
-# package loading
-library(tidyverse)
+source("functions/functions.R")
 
-# Get all weeks on one file
-wk07 <- read.csv("outputs/wk07.cases.csv")
-wk08 <- read.csv("outputs/wk08.cases.csv")
-wk09 <- read.csv("outputs/wk09.cases.csv")
-wk10 <- read.csv("outputs/wk10.cases.csv")
-wk10 <- wk10 %>% 
-  select(-c(X..of.Change))
-wk11 <- read.csv("outputs/wk11.cases.csv")
-wk11 <- wk11 %>% 
-  select(-c(X..of.Change))
-wk12 <- read.csv("outputs/wk12.cases.csv")
-wk12 <- wk12 %>% 
-  select(-c(X..of.Change))
-wk13 <- read.csv("outputs/wk13.cases.csv")
-wk13 <- wk13 %>% 
-  select(-c(X..of.Change))
-wk14 <- read.csv("outputs/wk14.cases.csv")
-wk14 <- wk14 %>% 
-  select(-c(X..of.Change))
-wk15 <- read.csv("outputs/wk15.cases.csv")
-wk15 <- wk15 %>% 
-  select(-c(X..of.Change))
-wk16 <- read.csv("outputs/wk16.cases.csv")
-wk16 <- wk16 %>% 
-  select(-c(X..of.Change))
-wk17 <- read.csv("outputs/wk17.cases.csv")
-wk17 <- wk17 %>% 
-  select(-c(X..of.Change))
-wk18 <- read.csv("outputs/wk18.cases.csv")
+# Calulcate Cases
+wk07 <- CaseCount("data/WalmartCAOweek7.csv", "outputs/wk07.cases.csv")
+wk08 <- CaseCount("data/WalmartCAOweek8.csv", "outputs/wk08.cases.csv")
+wk09 <- CaseCount("data/WalmartCAOweek9.csv", "outputs/wk09.cases.csv")
+wk10 <- CaseCount("data/WalmartCAOweek10.csv", "outputs/wk10.cases.csv")
+wk11 <- CaseCount("data/WalmartCAOweek11.csv", "outputs/wk11.cases.csv")
+wk12 <- CaseCount("data/WalmartCAOweek12.csv", "outputs/wk12.cases.csv")
+wk13 <- CaseCount("data/WalmartCAOweek13.csv", "outputs/wk13.cases.csv")
+wk14 <- CaseCount("data/WalmartCAOweek14.csv", "outputs/wk14.cases.csv")
+wk15 <- CaseCount("data/WalmartCAOweek15.csv", "outputs/wk15.cases.csv")
+wk16 <- CaseCount("data/WalmartCAOweek16.csv", "outputs/wk16.cases.csv")
+wk17 <- CaseCount("data/WalmartCAOweek17.csv", "outputs/wk17.cases.csv")
+wk18 <- CaseCount("data/WalmartCAOweek18.csv", "outputs/wk18.cases.csv")
+wk24 <- CaseCount("data/WalmartCAOweek24.csv", "outputs/wk24.cases.csv")
+wk25 <- CaseCount("data/WalmartCAOweek25.csv", "outputs/wk25.cases.csv")
+wk26 <- CaseCount("data/WalmartCAOweek26.csv", "outputs/wk26.cases.csv")
+wk27 <- CaseCount("data/WalmartCAOweek27.csv", "outputs/wk27.cases.csv")
 
-full <- rbind(wk07, wk08, wk09, wk10, wk11, wk12, wk13, wk14, wk15, wk16, wk17, wk18)
-write.csv(full, "outputs/allweeks.csv")
+# rbind all weeks
+
+dfs = sapply(.GlobalEnv, is.data.frame) 
+
+full <- do.call(rbind, mget(names(dfs)[dfs])) %>% 
+  mutate(Week = paste("Week", str_sub(WM.Week, -2))) %>% 
+  select(-c(WM.Week))
 
 # get data tidied up, can't do simple gather, must subset dataframes then rbind
 full <- full %>%
-  mutate(sort.order = Weekly.AM.Order.Cases) %>% 
-  select(-c(X, Weekly.Unit.Sales, Weekly.Units.On.Hand, Weekly.AM.Order.Units, Weekly.GRS.Order.Units))
+  mutate(sort.order = Weekly.AM.Order.Cases)
 
-one <- full %>% 
+am.orders <- full %>% 
   select(-c(Weekly.GRS.Order.Cases, Weekly.Cases.On.Hand, Weekly.Cases.Sales)) %>% 
   mutate(count_type = "Weekly.AM.Order.Cases") %>% 
   rename(case_count = Weekly.AM.Order.Cases)
 
-two <- full %>% 
+grs.orders <- full %>% 
   select(-c(Weekly.AM.Order.Cases, Weekly.Cases.On.Hand, Weekly.Cases.Sales)) %>% 
   mutate(count_type = "Weekly.GRS.Order.Cases") %>% 
-rename(case_count = Weekly.GRS.Order.Cases)
+  rename(case_count = Weekly.GRS.Order.Cases)
 
-three <- full %>% 
+weekly.cases <- full %>% 
   select(-c(Weekly.AM.Order.Cases, Weekly.GRS.Order.Cases, Weekly.Cases.Sales)) %>% 
   mutate(count_type = "Weekly.Cases.On.Hand") %>% 
-rename(case_count = Weekly.Cases.On.Hand)
+  rename(case_count = Weekly.Cases.On.Hand)
 
-four <- full %>% 
+weekly.sales <- full %>% 
   select(-c(Weekly.AM.Order.Cases, Weekly.GRS.Order.Cases, Weekly.Cases.On.Hand))%>% 
   mutate(count_type = "Weekly.Cases.Sales") %>% 
-rename(case_count = Weekly.Cases.Sales)
+  rename(case_count = Weekly.Cases.Sales)
 
-tidyfull <- rbind(one, two, three, four)
+tidyfull <- rbind(am.orders, grs.orders, weekly.cases, weekly.sales)
 
-write.csv(tidyfull, "outputs/tidyallweeks.csv")
+write.csv(tidyfull, "outputs/tableautest.csv")
