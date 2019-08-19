@@ -1,3 +1,14 @@
+# https://ccna-tableau.ko.com/#/site/Walmart/views/WalmartCAOWeeklyBreakdownResults_0/ExcelDownloadDataView?:iid=1
+# Download then add columns:
+# WM Week (as YYYYMM)
+# OWNER
+# Change Store Nbr to Store
+# Beverage Category to Bev Cat
+# Retail Package Category to Pack
+# Beverage Product Description to Brand
+# Weekly GRS Ordered Units to Weekly GRS Order Units
+# Remove Avg. from days of supply
+
 source("functions/functions.R")
 
 # Calulcate Cases
@@ -18,6 +29,7 @@ wk25 <- CaseCount("data/WalmartCAOweek25.csv", "outputs/wk25.cases.csv")
 wk26 <- CaseCount("data/WalmartCAOweek26.csv", "outputs/wk26.cases.csv")
 wk27 <- CaseCount("data/WalmartCAOweek27.csv", "outputs/wk27.cases.csv")
 wk28 <- CaseCount("data/WalmartCAOweek28.csv", "outputs/wk28.cases.csv")
+wk29 <- CaseCount("data/WalmartCAOweek29.csv", "outputs/wk29.cases.csv")
 
 # rbind all weeks
 
@@ -54,3 +66,4 @@ weekly.sales <- full %>%
 tidyfull <- rbind(am.orders, grs.orders, weekly.cases, weekly.sales)
 
 write.csv(tidyfull, "outputs/tableautest.csv")
+
