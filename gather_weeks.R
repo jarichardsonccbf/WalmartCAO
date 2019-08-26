@@ -1,4 +1,7 @@
 # https://ccna-tableau.ko.com/#/site/Walmart/views/WalmartCAOWeeklyBreakdownResults_0/ExcelDownloadDataView?:iid=1
+
+# From microsoft page use S180274@alwaysko.com 
+ 
 # Download then add columns:
 # WM Week (as YYYYMM)
 # OWNER
