@@ -1,10 +1,13 @@
 # https://ccna-tableau.ko.com/#/site/Walmart/views/WalmartCAOWeeklyBreakdownResults_0/ExcelDownloadDataView?:iid=1
 
 # From microsoft page use S180274@alwaysko.com 
+# From sso.connect.coca-cola use jarichardson@cocacolaflorida.com
+# Search "Excel download data view"
  
 # Download then add columns:
 # WM Week (as YYYYWW)
 # OWNER
+
 # Change Store Nbr to Store
 # Beverage Category to Bev Cat
 # Retail Package Group to Pack
@@ -34,6 +37,8 @@ wk27 <- CaseCount("data/WalmartCAOweek27.csv", "outputs/wk27.cases.csv")
 wk28 <- CaseCount("data/WalmartCAOweek28.csv", "outputs/wk28.cases.csv")
 wk29 <- CaseCount("data/WalmartCAOweek29.csv", "outputs/wk29.cases.csv")
 wk30 <- CaseCount("data/WalmartCAOweek30.csv", "outputs/wk30.cases.csv")
+wk31 <- CaseCount("data/WalmartCAOweek31.csv", "outputs/wk31.cases.csv")
+
 
 # rbind all weeks
 
