@@ -2,6 +2,7 @@
 library(tidyverse)
 library(plotly)
 library(Metrics)
+library(MMWRweek)
 
 # converts units to cases and cuts out noise
 CaseCount <- function(week.name, output.file.location) {
@@ -13,6 +14,12 @@ CaseCount <- function(week.name, output.file.location) {
     distinct()
   
   wk <- read.csv(week.name, stringsAsFactors = FALSE)
+  
+  wk <- wk %>% 
+    mutate(week = substring(as.character(WM.Week), 5),
+           year = substring(as.character(WM.Week), first = 1, last = 4),
+           date = MMWRweek2Date(MMWRyear = as.numeric(year),
+                                MMWRweek = as.numeric(week) + 4) -1)
   
   # convert units to cases
   
@@ -50,7 +57,7 @@ CaseCount <- function(week.name, output.file.location) {
   wk.ccbf.instocks <- wk.pack %>% 
     filter(OWNER == "CCBF") %>% 
     filter(!(Weekly.Unit.Sales == 0 & Weekly.Units.On.Hand == 0 & Weekly.AM.Order.Units == 0)) %>% 
-    select(WM.Week, OWNER, Store, City, State, Brand, Pack, Days.of.Supply, Weekly.AM.Order.Cases, Weekly.GRS.Order.Cases, Weekly.Cases.On.Hand, Weekly.Cases.Sales, case.difference)
+    select(WM.Week, OWNER, Store, City, State, Brand, Pack, Days.of.Supply, Weekly.AM.Order.Cases, Weekly.GRS.Order.Cases, Weekly.Cases.On.Hand, Weekly.Cases.Sales, case.difference, week, year, date)
     
   write.csv(wk.ccbf.instocks, output.file.location)
   
