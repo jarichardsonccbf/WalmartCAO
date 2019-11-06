@@ -1,6 +1,5 @@
 # package loading
 library(tidyverse)
-library(plotly)
 library(Metrics)
 library(MMWRweek)
 
