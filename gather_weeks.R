@@ -49,6 +49,8 @@ wk39 <- CaseCount("data/WalmartCAOweek39.csv", "outputs/wk39.cases.csv")
 wk40 <- CaseCount("data/WalmartCAOweek40.csv", "outputs/wk40.cases.csv")
 wk41 <- CaseCount("data/WalmartCAOweek41.csv", "outputs/wk41.cases.csv")
 wk42 <- CaseCount("data/WalmartCAOweek42.csv", "outputs/wk42.cases.csv")
+wk43 <- CaseCount("data/WalmartCAOweek43.csv", "outputs/wk43.cases.csv")
+wk44 <- CaseCount("data/WalmartCAOweek44.csv", "outputs/wk44.cases.csv")
 
 
 # rbind all weeks
