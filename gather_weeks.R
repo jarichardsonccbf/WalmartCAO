@@ -10,10 +10,11 @@
 
 # Change Store Nbr to Store
 # Beverage Category to Bev Cat
-# Retail Package Group to Pack
+# Retail Package Group or Package to Pack
 # Beverage Product Description to Brand
 # Weekly GRS Ordered Units to Weekly GRS Order Units
 # Remove "Avg." from days of supply
+# Convert columns with case counts to "number"
 
 source("functions/functions.R")
 
@@ -52,7 +53,10 @@ wk42 <- CaseCount("data/WalmartCAOweek42.csv", "outputs/wk42.cases.csv")
 wk43 <- CaseCount("data/WalmartCAOweek43.csv", "outputs/wk43.cases.csv")
 wk44 <- CaseCount("data/WalmartCAOweek44.csv", "outputs/wk44.cases.csv")
 wk45 <- CaseCount("data/WalmartCAOweek45.csv", "outputs/wk45.cases.csv")
-
+wk46 <- CaseCount("data/WalmartCAOweek46.csv", "outputs/wk46.cases.csv")
+wk47 <- CaseCount("data/WalmartCAOweek47.csv", "outputs/wk47.cases.csv")
+wk48 <- CaseCount("data/WalmartCAOweek48.csv", "outputs/wk48.cases.csv")
+wk49 <- CaseCount("data/WalmartCAOweek49.csv", "outputs/wk49.cases.csv")
 
 # rbind all weeks
 
