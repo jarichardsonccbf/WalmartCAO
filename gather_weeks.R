@@ -16,7 +16,8 @@
 # Remove "Avg." from days of supply
 # Convert columns with case counts to "number"
 
-source("functions/functions.R")
+source("functions/2019functions.R")
+source("functions/late2019functions.R")
 
 # Calulcate Cases
 wk07 <- CaseCount("data/WalmartCAOweek7.csv", "outputs/wk07.cases.csv")
@@ -57,6 +58,9 @@ wk46 <- CaseCount("data/WalmartCAOweek46.csv", "outputs/wk46.cases.csv")
 wk47 <- CaseCount("data/WalmartCAOweek47.csv", "outputs/wk47.cases.csv")
 wk48 <- CaseCount("data/WalmartCAOweek48.csv", "outputs/wk48.cases.csv")
 wk49 <- CaseCount("data/WalmartCAOweek49.csv", "outputs/wk49.cases.csv")
+wk50 <- CaseCount2("data/WalmartCAOweek50.csv", "outputs/wk50.cases.csv")
+wk51 <- CaseCount2("data/WalmartCAOweek51.csv", "outputs/wk51.cases.csv")
+wk52 <- CaseCount2("data/WalmartCAOweek52.csv", "outputs/wk52.cases.csv")
 
 # rbind all weeks
 
