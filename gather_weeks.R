@@ -1,9 +1,9 @@
 # https://ccna-tableau.ko.com/#/site/Walmart/views/WalmartCAOWeeklyBreakdownResults_0/ExcelDownloadDataView?:iid=1
 
-# From microsoft page use S180274@alwaysko.com 
+# From microsoft page use S180274@alwaysko.com
 # From sso.connect.coca-cola use jarichardson@cocacolaflorida.com
 # Search "Excel download data view"
- 
+
 # Download then add columns:
 # WM Week (as YYYYWW)
 # OWNER
@@ -18,6 +18,7 @@
 
 source("functions/2019functions.R")
 source("functions/late2019functions.R")
+source("functions/2020functions.R")
 
 # Calulcate Cases
 wk07 <- CaseCount("data/WalmartCAOweek7.csv", "outputs/wk07.cases.csv")
@@ -61,37 +62,39 @@ wk49 <- CaseCount("data/WalmartCAOweek49.csv", "outputs/wk49.cases.csv")
 wk50 <- CaseCount2("data/WalmartCAOweek50.csv", "outputs/wk50.cases.csv")
 wk51 <- CaseCount2("data/WalmartCAOweek51.csv", "outputs/wk51.cases.csv")
 wk52 <- CaseCount2("data/WalmartCAOweek52.csv", "outputs/wk52.cases.csv")
+wk53 <- CaseCount2("data/WalmartCAOweek53.csv", "outputs/wk53.cases.csv")
+wk202001 <- CaseCount2020("data/WalmartCAOweek202001.csv", "outputs/wk202001.cases.csv")
 
 # rbind all weeks
 
-dfs = sapply(.GlobalEnv, is.data.frame) 
+dfs = sapply(.GlobalEnv, is.data.frame)
 
-full <- do.call(rbind, mget(names(dfs)[dfs])) %>% 
-  mutate(Week = paste("Week", str_sub(WM.Week, -2))) %>% 
+full <- do.call(rbind, mget(names(dfs)[dfs])) %>%
+  mutate(Week = paste("Week", str_sub(WM.Week, -2))) %>%
   select(-c(WM.Week))
 
 # get data tidied up, can't do simple gather, must subset dataframes then rbind
 full <- full %>%
   mutate(sort.order = Weekly.AM.Order.Cases)
 
-am.orders <- full %>% 
-  select(-c(Weekly.GRS.Order.Cases, Weekly.Cases.On.Hand, Weekly.Cases.Sales)) %>% 
-  mutate(count_type = "Weekly.AM.Order.Cases") %>% 
+am.orders <- full %>%
+  select(-c(Weekly.GRS.Order.Cases, Weekly.Cases.On.Hand, Weekly.Cases.Sales)) %>%
+  mutate(count_type = "Weekly.AM.Order.Cases") %>%
   rename(case_count = Weekly.AM.Order.Cases)
 
-grs.orders <- full %>% 
-  select(-c(Weekly.AM.Order.Cases, Weekly.Cases.On.Hand, Weekly.Cases.Sales)) %>% 
-  mutate(count_type = "Weekly.GRS.Order.Cases") %>% 
+grs.orders <- full %>%
+  select(-c(Weekly.AM.Order.Cases, Weekly.Cases.On.Hand, Weekly.Cases.Sales)) %>%
+  mutate(count_type = "Weekly.GRS.Order.Cases") %>%
   rename(case_count = Weekly.GRS.Order.Cases)
 
-weekly.cases <- full %>% 
-  select(-c(Weekly.AM.Order.Cases, Weekly.GRS.Order.Cases, Weekly.Cases.Sales)) %>% 
-  mutate(count_type = "Weekly.Cases.On.Hand") %>% 
+weekly.cases <- full %>%
+  select(-c(Weekly.AM.Order.Cases, Weekly.GRS.Order.Cases, Weekly.Cases.Sales)) %>%
+  mutate(count_type = "Weekly.Cases.On.Hand") %>%
   rename(case_count = Weekly.Cases.On.Hand)
 
-weekly.sales <- full %>% 
-  select(-c(Weekly.AM.Order.Cases, Weekly.GRS.Order.Cases, Weekly.Cases.On.Hand))%>% 
-  mutate(count_type = "Weekly.Cases.Sales") %>% 
+weekly.sales <- full %>%
+  select(-c(Weekly.AM.Order.Cases, Weekly.GRS.Order.Cases, Weekly.Cases.On.Hand))%>%
+  mutate(count_type = "Weekly.Cases.Sales") %>%
   rename(case_count = Weekly.Cases.Sales)
 
 tidyfull <- rbind(am.orders, grs.orders, weekly.cases, weekly.sales)
