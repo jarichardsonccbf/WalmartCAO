@@ -64,6 +64,11 @@ wk51 <- CaseCount2("data/WalmartCAOweek51.csv", "outputs/wk51.cases.csv")
 wk52 <- CaseCount2("data/WalmartCAOweek52.csv", "outputs/wk52.cases.csv")
 wk53 <- CaseCount2("data/WalmartCAOweek53.csv", "outputs/wk53.cases.csv")
 wk202001 <- CaseCount2020("data/WalmartCAOweek202001.csv", "outputs/wk202001.cases.csv")
+wk202002 <- CaseCount2020("data/WalmartCAOweek202002.csv", "outputs/wk202002.cases.csv")
+wk202003 <- CaseCount2020("data/WalmartCAOweek202003.csv", "outputs/wk202003.cases.csv")
+wk202004 <- CaseCount2020("data/WalmartCAOweek202004.csv", "outputs/wk202004.cases.csv")
+wk202005 <- CaseCount2020("data/WalmartCAOweek202005.csv", "outputs/wk202005.cases.csv")
+
 
 # rbind all weeks
 
