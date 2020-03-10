@@ -12,7 +12,7 @@ CaseCount2020 <- function(week.name, output.file.location) {
     select(Pack, Units.per.case) %>%
     distinct()
 
-  wk <- read.csv("data/WalmartCAOweek202001.csv", stringsAsFactors = FALSE)
+  wk <- read.csv(week.name, stringsAsFactors = FALSE)
 
   wk <- wk %>%
     mutate(week = substring(as.character(WM.Week), 5),
