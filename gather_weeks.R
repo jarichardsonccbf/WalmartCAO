@@ -68,6 +68,7 @@ wk202002 <- CaseCount2020("data/WalmartCAOweek202002.csv", "outputs/wk202002.cas
 wk202003 <- CaseCount2020("data/WalmartCAOweek202003.csv", "outputs/wk202003.cases.csv")
 wk202004 <- CaseCount2020("data/WalmartCAOweek202004.csv", "outputs/wk202004.cases.csv")
 wk202005 <- CaseCount2020("data/WalmartCAOweek202005.csv", "outputs/wk202005.cases.csv")
+wk202006 <- CaseCount2020_no_dos("data/WalmartCAOweek202006.csv", "outputs/wk202006.cases.csv")
 
 
 # rbind all weeks
@@ -105,3 +106,7 @@ weekly.sales <- full %>%
 tidyfull <- rbind(am.orders, grs.orders, weekly.cases, weekly.sales)
 
 write.csv(tidyfull, "outputs/tableautest.csv")
+
+a <- tidyfull %>%
+  select(week, year, date) %>%
+  unique()
