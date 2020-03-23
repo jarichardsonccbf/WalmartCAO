@@ -69,7 +69,7 @@ wk202003 <- CaseCount2020("data/WalmartCAOweek202003.csv", "outputs/wk202003.cas
 wk202004 <- CaseCount2020("data/WalmartCAOweek202004.csv", "outputs/wk202004.cases.csv")
 wk202005 <- CaseCount2020("data/WalmartCAOweek202005.csv", "outputs/wk202005.cases.csv")
 wk202006 <- CaseCount2020_no_dos("data/WalmartCAOweek202006.csv", "outputs/wk202006.cases.csv")
-
+wk202007 <- CaseCount2020_no_dos("data/WalmartCAOweek202007.csv", "outputs/wk202007.cases.csv")
 
 # rbind all weeks
 
